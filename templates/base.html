@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <style>
+        @font-face {
+            font-family: "JosefinSans";
+            src: url('{{ url_for("static", filename="JosefinSans.ttf") }}');
+        }
+
+        * {
+            font-family: 'JosefinSans', sans-serif;
+        }
+
+        .header1 {
+            grid-area: a;
+            background-color: rgb(222, 225, 220) !important;
+        }
+
+        .header2 {
+            grid-area: b;
+            background-color: rgb(196, 205, 193) !important;
+        }
+
+        .main_content {
+            grid-area: c;
+            background-color: rgb(222, 225, 220) !important;
+        }
+
+        .footer {
+            grid-area: d;
+            background-color: rgb(white) !important;
+
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-areas:
+                'a a a a a a'
+                'b b b b b b'
+                'c c c c c c'
+                'd d d d d d'
+            ;
+
+            gap: 1px;
+            background-color: rgb(41, 39, 39);
+            padding: 1px;
+        }
+
+        .grid-container>div {
+            background-color: white;
+            padding: 10px;
+            font-size: 15px;
+        }
+
+        .center {
+            width: 280px;
+            height: auto;
+
+        }
+
+        .small {
+            width: auto;
+            height: 25px;
+            clear: none;
+            float: left;
+            margin: 5px;
+
+        }
+
+        .search {
+            float: right;
+            margin: 10px;
+        }
+
+        .header_links {
+            text-decoration: none;
+            color: white;
+            font-size: 30px;
+            padding: 15px;
+        }
+
+        .footer p {
+            font-size: 15px;
+        }
+
+
+        #searchResults li:before {
+            content: "\2605";
+            padding: 10px;
+        }
+
+        #searchResults li {
+            list-style-type: none;
+            padding: 10px;
+        }
+
+        #searchResults a {
+            text-decoration: none;
+            color: black;
+            font-size: 30px;
+        }
+
+        #searchResults a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .search {
+            float: right;
+            margin: 10px;
+            font-size: 20px;
+        }
+
+        #search {
+            font-size: 16px;
+            padding: 8px;
+            width: 200px;
+        }
+
+        button {
+            font-size: 16px;
+            padding: 8px 16px;
+        }
+
+        #register{
+            color:black;
+            font-size: 20px;
+        }
+        
+    </style>
+
+    {% block style %}{% endblock %}
+
+</head>
+
+<body>
+    <div class="grid-container">
+
+        <div class="header1">
+
+            <div class="small">
+                <a href="https://www.instagram.com/emi_dawn/" target="blank">
+                    <img class="small" src="{{ url_for('static', filename='instaLogo.png') }}">
+                </a>
+
+                <a href="mailto:emilypoltorak@example.com">
+                    <img class="small" src="{{ url_for('static', filename='gmail.png') }}">
+                </a>
+
+                <a href="https://www.pinterest.com/emi_dawn/" target="blank">
+                    <img class="small" src="{{ url_for('static', filename='pinterest.png') }}">
+                </a>
+
+                <a id ="register" class="header_links" href="{{ url_for('register') }}">Register</a>
+
+            </div>
+
+            <div class="search">
+                <input type="text" id="search" placeholder="Search by title..." onkeypress="handleKeyPress(event)">
+                <button onclick="searchPost()">Search</button>
+            </div>
+            <br>
+
+        </div>
+
+        <div class="header2">
+
+            <center>
+                <img class="center" src="{{ url_for('static', filename='blogLogo.png') }}" alt="Webpage Logo">
+
+                <div>
+                    <a class="header_links" href="{{ url_for('about') }}">About</a>
+                    <a class="header_links" href="{{ url_for('otherUser') }}">Home</a>
+                    <a class="header_links" href="{{ url_for('login')}}">Create</a>
+                </div>
+            </center>
+
+
+        </div>
+
+        <div class="main_content">
+            {% block form %}{% endblock %}
+
+            {% block display %}{% endblock %}
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+
+        <pre>
+Made by Emily's Blogs
+
+Contact Me:
+
+Phone: 54-56-72804
+Gmail: emilypoltorak@gmail.com
+address: 8915 Sawyer st. Los Angeles, CA 90035
+
+</pre>
+        <center>
+            <p id="copyright">COPYRIGHT © 2023 EMILY'S BLOGS - ALL RIGHTS RESERVED.</p>
+            <br>
+        </center>
+
+    </div>
+
+    </div>
+
+    <script>
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                searchPost();
+            }
+        }
+
+        function searchPost() {
+            var searchQuery = document.getElementById("search").value;
+            fetch(`/search?query=${searchQuery}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySearchResults(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        function displaySearchResults(results) {
+            var mainContent = document.querySelector(".main_content");
+            mainContent.innerHTML = "";
+
+            if (results.length === 0) {
+                mainContent.innerHTML = "<p>No results found</p>";
+            } else {
+                var resultList = document.createElement("ul");
+                resultList.id = "searchResults";
+
+                results.forEach(result => {
+                    var listItem = document.createElement("li");
+                    var link = document.createElement("a");
+                    link.href = result.url;
+                    link.textContent = result.title;
+
+                    var timestampSpan = document.createElement("span");
+                    timestampSpan.textContent = "- Date created: " + result.timestamp;
+
+                    listItem.appendChild(link);
+                    listItem.appendChild(timestampSpan);
+                    resultList.appendChild(listItem);
+                });
+
+                mainContent.appendChild(resultList);
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

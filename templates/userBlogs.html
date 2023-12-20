@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+
+{% block style %}
+<style>
+    img {
+        width: 300px;
+        height: auto;
+    }
+
+    .image-container {
+        display: inline-block;
+        border: 3px solid rgb(73, 73, 73);
+        padding: 10px;
+        margin: 50px;
+        background-color: white;
+    }
+
+    .image-container img {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .image-container p {
+        max-width: 300px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .linkText {
+        color: black;
+        font-size: 20px;
+        padding: 0;
+        border: 1px solid #000;
+        padding: 5px;
+        text-decoration: none;
+    }
+
+    .comments-section {
+        margin-top: 15px;
+        border-top: 2px solid black;
+        padding-top: 10px; 
+        font-size: 20px;
+    }
+
+    .comment {
+        margin-bottom: 10px; 
+    }
+
+    #create_comment {
+        margin-top: 20px; 
+    }
+
+    #create_comment label,
+    #create_comment textarea,
+    #create_comment input,
+    #create_comment button {
+        margin-bottom: 10px; 
+    }
+
+    #create_comment textarea {
+        max-width: 300px; 
+        width: 100%; 
+        box-sizing: border-box; 
+    }
+
+    #comment_btn {
+        background-color: #90b091;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    #comment_btn:hover {
+        background-color: #647d66;
+    }
+</style>
+{% endblock %}
+
+<!-- -------------------------------------- post display -------------------------------------- -->
+
+{% block display %}
+<div id="blogPosts">
+    <ul>
+        {% for post in posts.items %}
+        <div id="{{ post.title }}" class="image-container">
+            {% if post.image %}
+            <img src="{{ url_for('static', filename=post.image[7:]) }}">
+            {% endif %}
+            <h3>Title: {{ post.title }}</h3>
+            <h4>Author: {{ post.author }}</h4>
+            <p id="postContent">{{ post.content }}</p>
+            <p>{{ post.timestamp }}</p>
+    <!-- -------------------------------------- comment creation -------------------------------------- -->
+
+            <form id="create_comment" method="post" action="{{ url_for('add_comment', post_id=post.id) }}">
+                <label id="add_comment" for="comment">Add a Comment:</label>
+                <br>
+                <textarea name="comment" id="comment" required></textarea>
+                <br>
+                <input type="text" name="commenter_name" placeholder="Your Name" required>
+                <br>
+                <button id="comment_btn" type="submit">Submit Comment</button>
+            </form>
+    <!-- -------------------------------------- comment display -------------------------------------- -->
+
+            <div class="comments-section">
+                <h5>Comments:</h5>
+                <ul>
+                    {% for comment in post.comments %}
+                        <li class="comment">{{ comment.commenter_name }} says: {{ comment.content }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- -------------------------------------- page creation -------------------------------------- -->
+
+{% if posts.items %}
+<div class="pagination">
+    <p> Page {{ posts.page }} of {{ posts.pages }}</p>
+
+    {% if posts.has_prev %}
+    <a class="linkText" href="{{ url_for('otherUser', page=posts.prev_num) }}">Previous</a>
+    {% endif %}
+
+    {% if posts.has_next %}
+    <a class="linkText" href="{{ url_for('otherUser', page=posts.next_num) }}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+<script>
+    window.onload = function () {
+        if (window.location.hash) {
+            const element = document.getElementById(window.location.hash.substring(1));
+            console.log(element);
+
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }
+</script>
